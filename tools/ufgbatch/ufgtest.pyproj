@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{f7a828a7-5ae5-4bdd-b2cb-8a7699c3fef9}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>ufgtest.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>C:\projects\ufg_tests\data\test</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+    <InterpreterVersion />
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <CommandLineArguments>misc.csv --exe "C:\projects\ufg_built\build\ufg\usd_from_gltf\Release\usd_from_gltf.exe" --deploy_all</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="ufgcommon\deploy.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ufgcommon\diff.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ufgcommon\task.py" />
+    <Compile Include="ufgcommon\util.py" />
+    <Compile Include="ufgcommon\__init__.py" />
+    <Compile Include="ufgtest.py" />
+    <Compile Include="ufgvalidate.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ufgcommon" />
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>

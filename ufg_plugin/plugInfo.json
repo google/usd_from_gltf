@@ -1,0 +1,21 @@
+{
+    "Plugins": [
+        {
+            "Info": {
+                "Types": {
+                    "UsdGltfFileFormat": {
+                        "bases": ["SdfFileFormat"],
+                        "displayName": "GLTF Importer",
+                        "extensions": ["gltf", "glb"],
+                        "formatId": "gltf",
+                        "primary": true,
+                        "target": "usd"
+                    }
+                }
+            },
+            "LibraryPath": "ufg_plugin.dll",
+            "Name": "ufg_plugin",
+            "Type": "library"
+        }
+    ]
+}

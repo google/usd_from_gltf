@@ -1,0 +1,67 @@
+@2.0 Samples - GLTF
+2CylinderEngine, 2.0/2CylinderEngine/glTF/2CylinderEngine.gltf, 2.0/gltf/2CylinderEngine
+AlphaBlendModeTest, 2.0/AlphaBlendModeTest/glTF/AlphaBlendModeTest.gltf, 2.0/gltf/AlphaBlendModeTest
+AnimatedCube, 2.0/AnimatedCube/glTF/AnimatedCube.gltf, 2.0/gltf/AnimatedCube
+AnimatedMorphCube, 2.0/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf, 2.0/gltf/AnimatedMorphCube
+AnimatedMorphSphere, 2.0/AnimatedMorphSphere/glTF/AnimatedMorphSphere.gltf, 2.0/gltf/AnimatedMorphSphere
+AnimatedTriangle, 2.0/AnimatedTriangle/glTF/AnimatedTriangle.gltf, 2.0/gltf/AnimatedTriangle
+AntiqueCamera, 2.0/AntiqueCamera/glTF/AntiqueCamera.gltf, 2.0/gltf/AntiqueCamera
+Avocado, 2.0/Avocado/glTF/Avocado.gltf, 2.0/gltf/Avocado
+BarramundiFish, 2.0/BarramundiFish/glTF/BarramundiFish.gltf, 2.0/gltf/BarramundiFish
+BoomBox, 2.0/BoomBox/glTF/BoomBox.gltf, 2.0/gltf/BoomBox
+BoomBoxWithAxes, 2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf, 2.0/gltf/BoomBoxWithAxes
+Box, 2.0/Box/glTF/Box.gltf, 2.0/gltf/Box
+BoxAnimated, 2.0/BoxAnimated/glTF/BoxAnimated.gltf, 2.0/gltf/BoxAnimated
+BoxInterleaved, 2.0/BoxInterleaved/glTF/BoxInterleaved.gltf, 2.0/gltf/BoxInterleaved
+BoxTextured, 2.0/BoxTextured/glTF/BoxTextured.gltf, 2.0/gltf/BoxTextured
+BoxTexturedNonPowerOfTwo, 2.0/BoxTexturedNonPowerOfTwo/glTF/BoxTexturedNonPowerOfTwo.gltf, 2.0/gltf/BoxTexturedNonPowerOfTwo
+BoxVertexColors, 2.0/BoxVertexColors/glTF/BoxVertexColors.gltf, 2.0/gltf/BoxVertexColors
+BrainStem, 2.0/BrainStem/glTF/BrainStem.gltf, 2.0/gltf/BrainStem
+Buggy, 2.0/Buggy/glTF/Buggy.gltf, 2.0/gltf/Buggy
+Cameras, 2.0/Cameras/glTF/Cameras.gltf, 2.0/gltf/Cameras
+CesiumMan, 2.0/CesiumMan/glTF/CesiumMan.gltf, 2.0/gltf/CesiumMan
+CesiumMilkTruck, 2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf, 2.0/gltf/CesiumMilkTruck
+Corset, 2.0/Corset/glTF/Corset.gltf, 2.0/gltf/Corset
+Cube, 2.0/Cube/glTF/Cube.gltf, 2.0/gltf/Cube
+DamagedHelmet, 2.0/DamagedHelmet/glTF/DamagedHelmet.gltf, 2.0/gltf/DamagedHelmet
+Duck, 2.0/Duck/glTF/Duck.gltf, 2.0/gltf/Duck
+EnvironmentTest, 2.0/EnvironmentTest/glTF/EnvironmentTest.gltf, 2.0/gltf/EnvironmentTest
+FlightHelmet, 2.0/FlightHelmet/glTF/FlightHelmet.gltf, 2.0/gltf/FlightHelmet
+GearboxAssy, 2.0/GearboxAssy/glTF/GearboxAssy.gltf, 2.0/gltf/GearboxAssy
+InterpolationTest_anim0, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim0, --anim 0
+InterpolationTest_anim1, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim1, --anim 1
+InterpolationTest_anim2, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim2, --anim 2
+InterpolationTest_anim3, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim3, --anim 3
+InterpolationTest_anim4, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim4, --anim 4
+InterpolationTest_anim5, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim5, --anim 5
+InterpolationTest_anim6, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim6, --anim 6
+InterpolationTest_anim7, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim7, --anim 7
+InterpolationTest_anim8, 2.0/InterpolationTest/glTF/InterpolationTest.gltf, 2.0/gltf/InterpolationTest_anim8, --anim 8
+Lantern, 2.0/Lantern/glTF/Lantern.gltf, 2.0/gltf/Lantern
+MetalRoughSpheres, 2.0/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf, 2.0/gltf/MetalRoughSpheres
+Monster, 2.0/Monster/glTF/Monster.gltf, 2.0/gltf/Monster
+MorphPrimitivesTest, 2.0/MorphPrimitivesTest/glTF/MorphPrimitivesTest.gltf, 2.0/gltf/MorphPrimitivesTest
+MultiUVTest, 2.0/MultiUVTest/glTF/MultiUVTest.gltf, 2.0/gltf/MultiUVTest
+NormalTangentMirrorTest, 2.0/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf, 2.0/gltf/NormalTangentMirrorTest
+NormalTangentTest, 2.0/NormalTangentTest/glTF/NormalTangentTest.gltf, 2.0/gltf/NormalTangentTest
+OrientationTest, 2.0/OrientationTest/glTF/OrientationTest.gltf, 2.0/gltf/OrientationTest
+ReciprocatingSaw, 2.0/ReciprocatingSaw/glTF/ReciprocatingSaw.gltf, 2.0/gltf/ReciprocatingSaw
+RiggedFigure, 2.0/RiggedFigure/glTF/RiggedFigure.gltf, 2.0/gltf/RiggedFigure
+RiggedSimple, 2.0/RiggedSimple/glTF/RiggedSimple.gltf, 2.0/gltf/RiggedSimple
+SciFiHelmet, 2.0/SciFiHelmet/glTF/SciFiHelmet.gltf, 2.0/gltf/SciFiHelmet
+SimpleMeshes, 2.0/SimpleMeshes/glTF/SimpleMeshes.gltf, 2.0/gltf/SimpleMeshes
+SimpleMorph, 2.0/SimpleMorph/glTF/SimpleMorph.gltf, 2.0/gltf/SimpleMorph
+SimpleSparseAccessor, 2.0/SimpleSparseAccessor/glTF/SimpleSparseAccessor.gltf, 2.0/gltf/SimpleSparseAccessor
+SpecGlossVsMetalRough, 2.0/SpecGlossVsMetalRough/glTF/SpecGlossVsMetalRough.gltf, 2.0/gltf/SpecGlossVsMetalRough
+Sponza, 2.0/Sponza/glTF/Sponza.gltf, 2.0/gltf/Sponza
+Suzanne, 2.0/Suzanne/glTF/Suzanne.gltf, 2.0/gltf/Suzanne
+TextureCoordinateTest, 2.0/TextureCoordinateTest/glTF/TextureCoordinateTest.gltf, 2.0/gltf/TextureCoordinateTest
+TextureSettingsTest, 2.0/TextureSettingsTest/glTF/TextureSettingsTest.gltf, 2.0/gltf/TextureSettingsTest
+TextureTransformTest, 2.0/TextureTransformTest/glTF/TextureTransformTest.gltf, 2.0/gltf/TextureTransformTest
+Triangle, 2.0/Triangle/glTF/Triangle.gltf, 2.0/gltf/Triangle
+TriangleWithoutIndices, 2.0/TriangleWithoutIndices/glTF/TriangleWithoutIndices.gltf, 2.0/gltf/TriangleWithoutIndices
+TwoSidedPlane, 2.0/TwoSidedPlane/glTF/TwoSidedPlane.gltf, 2.0/gltf/TwoSidedPlane
+UnlitTest, 2.0/UnlitTest/glTF/UnlitTest.gltf, 2.0/gltf/UnlitTest
+VC, 2.0/VC/glTF/VC.gltf, 2.0/gltf/VC
+VertexColorTest, 2.0/VertexColorTest/glTF/VertexColorTest.gltf, 2.0/gltf/VertexColorTest
+WaterBottle, 2.0/WaterBottle/glTF/WaterBottle.gltf, 2.0/gltf/WaterBottle
