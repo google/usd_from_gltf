@@ -6,9 +6,9 @@ Library, command-line tool, and import plugin for converting [glTF](https://www.
 
 This is a C++ native library that serves as an alternative to existing scripted solutions. Its main benefits are improved compatibility and conversion speed (see [Compatibility](#compatibility) and [Performance](#performance)).
 
-TLDR: [Install](#installation) it, then [convert](#cltool) with: `usd_from_gltf <source.gltf> <destination.usdz>`
+TLDR: [Install](#installation-steps) it, then [convert](#using-the-command-line-tool) with: `usd_from_gltf <source.gltf> <destination.usdz>`
 
-## Installation Steps {#installation}
+## Installation Steps
 
 *   Download and build [USD](https://github.com/PixarAnimationStudios/USD). See the associated README for prerequisites and build steps. Refer to USD installation directory as `{USD}`.
 *   Install [NASM](https://www.nasm.us).
@@ -25,7 +25,7 @@ TLDR: [Install](#installation) it, then [convert](#cltool) with: `usd_from_gltf 
 *   *(Optional)* Set `PXR_PLUGINPATH_NAME` so the glTF import plugin is available in Usdview. See ufginstall script output for the path.
 
 
-## Using the Command-Line Tool {#cltool}
+## Using the Command-Line Tool
 
 The command-line tool is called `usd_from_gltf` and is in the `{UFG_BUILD}/bin` directory. Run it with (use --help for full documentation):
 
@@ -61,7 +61,7 @@ The plugin isn't necessary for conversion, but it's useful for previewing glTF f
 
 To use it, set the `PXR_PLUGINPATH_NAME` environment variable to the directory containing `plugInfo.json`. See ufginstall script output for the path.
 
-## Compatibility {#compatibility}
+## Compatibility
 
 While USD is a general-purpose format, this library focuses on compatibility with [AR Quick Look](https://developer.apple.com/arkit/gallery). The [AR Quick Look](https://developer.apple.com/arkit/gallery) renderer only supports a subset of the [glTF 2.0 specification](https://github.com/KhronosGroup/glTF) though, so there are several limitations. Where reasonable, missing features are emulated.
 
@@ -126,7 +126,7 @@ The [AR Quick Look](https://developer.apple.com/arkit/gallery) renderer does not
 *   Emulate vertex colors by baking them into the texture. This is difficult to do generally because it may involve re-uv-mapping the model - something better left to content authors. It can be simplified for certain special cases, though (e.g. untextured models with only vertex colors can use a simple color atlas).
 *   Combine multiple UV sets. This is difficult to do because it requires re-uv-mapping the model - something better left to content authors.
 
-## Performance {#performance}
+## Performance
 
 usd_from_gltf is roughly 10-15x faster than current alternatives.
 
@@ -134,7 +134,7 @@ The bulk of the conversion time is spent in image processing and recompression, 
 
 ### Primary Optimizations
 *   Implemented in native C++.
-*   Supports multi-process model conversion through the ufgtest.py script.
+*   Supports multi-process model conversion through the ufgbatch.py script.
 *   Can generate both USDA and USDZ files in a single pass.
 
 ### Benchmarks
