@@ -57,10 +57,25 @@ add_library(process
 file(GLOB PROCESS_HEADERS "*.h")
 set_target_properties(process PROPERTIES PUBLIC_HEADER "${PROCESS_HEADERS}")
 
-# TODO: Libpng and libturbojpeg do not define library directories. We
-# install everything to <install_dir>/lib though, so we just use LIBRARY_DIR
-# from one of the other libraries.
+# Libpng and libturbojpeg do not define library directories. We need to search
+# for them because on different distros, they appear in different locations.
 set(INSTALLED_LIBRARY_DIR ${stb_image_LIBRARY_DIR})
+get_filename_component(PARENT_DIR ${stb_image_LIBRARY_DIR} DIRECTORY)
+find_library(PNG_LIBRARY
+  NAMES libpng16.a libpng16_static.lib
+  HINTS ${stb_image_LIBRARY_DIR} ${PARENT_DIR}/lib64
+)
+if (NOT PNG_LIBRARY)
+  message(FATAL_ERROR "Libpng not found.")
+endif (NOT PNG_LIBRARY)
+
+find_library(TURBOJPEG_LIBRARY
+  NAMES libturbojpeg.a turbojpeg-static.lib
+  HINTS ${stb_image_LIBRARY_DIR} ${PARENT_DIR}/lib64
+)
+if (NOT TURBOJPEG_LIBRARY)
+  message(FATAL_ERROR "Libturbojpeg not found.")
+endif (NOT TURBOJPEG_LIBRARY)
 
 if (MSVC)
 target_link_libraries(process
@@ -69,8 +84,8 @@ target_link_libraries(process
   "${draco_LIBRARY_DIR}/dracodec.lib"
   "${giflib_LIBRARY_DIR}/giflib.lib"
   "${stb_image_LIBRARY_DIR}/stb_image.lib"
-  "${INSTALLED_LIBRARY_DIR}/libpng16_static.lib"
-  "${INSTALLED_LIBRARY_DIR}/turbojpeg-static.lib"
+  "${PNG_LIBRARY}"
+  "${TURBOJPEG_LIBRARY}"
 )
 else (MSVC)
 
@@ -80,8 +95,8 @@ target_link_libraries(process
   "${draco_LIBRARY_DIR}/libdracodec.a"
   "${giflib_LIBRARY_DIR}/libgiflib.a"
   "${stb_image_LIBRARY_DIR}/libstb_image.a"
-  "${INSTALLED_LIBRARY_DIR}/libpng16.a"
-  "${INSTALLED_LIBRARY_DIR}/libturbojpeg.a"
+  "${PNG_LIBRARY}"
+  "${TURBOJPEG_LIBRARY}"
 )
 endif (MSVC)
 
