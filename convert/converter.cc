@@ -608,7 +608,7 @@ void Converter::CreateMesh(
           AppendNumber(path_str + "_prim", &prim - mesh.primitives.data());
     }
     const SdfPath path(path_str);
-    const UsdGeomMesh usd_mesh = UsdGeomMesh::Define(cc_.stage, path);
+    UsdGeomMesh usd_mesh = UsdGeomMesh::Define(cc_.stage, path);
 
     // Set vertex attributes.
     UFG_ASSERT_FORMAT(!prim_info.pos.empty());
@@ -627,6 +627,7 @@ void Converter::CreateMesh(
         norms = &skin_norms;
       }
       SetVertexNormals(usd_mesh.GetNormalsAttr(), *norms, emulate_double_sided);
+      usd_mesh.SetNormalsInterpolation(UsdGeomTokens->vertex);
     }
 
     const Materializer::Value* const material_binding =
