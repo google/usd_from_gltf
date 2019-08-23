@@ -22,6 +22,21 @@
 #include "process/process_util.h"
 
 namespace ufg {
+namespace {
+
+// Methods for converting fallback values to GfVec4f for UsdUVTexture nodes.
+GfVec4f FallbackToVec4(const GfVec4f& value) { return value; }
+
+GfVec4f FallbackToVec4(const GfVec3f& value) {
+  return GfVec4f(value[0], value[1], value[2], 1.f);
+}
+
+GfVec4f FallbackToVec4(const float value) {
+  return GfVec4f(value, 0.f, 0.f, 1.f);
+}
+
+}  // namespace
+
 using PXR_NS::SdfAssetPath;
 using PXR_NS::UsdShadeInput;
 using PXR_NS::VtValue;
@@ -280,9 +295,11 @@ void Materializer::AttachTextureInputTo(
   UsdShadeShader tex =
       CreateTextureShader(input.texCoord, sampler_id, disk_path, usd_name,
                           material_path, *uvsets, tex_name);
-  tex.CreateInput(kTokFallback, output_type).Set(fallback);
+  tex.CreateInput(kTokFallback, SdfValueTypeNames->Float4)
+      .Set(FallbackToVec4(fallback));
   if (!cc_->settings.bake_texture_color_scale_bias) {
-    tex.CreateInput(kTokScale, output_type).Set(scale);
+    tex.CreateInput(kTokScale, SdfValueTypeNames->Float4)
+        .Set(FallbackToVec4(fallback));
   }
   tex.CreateOutput(connect_tok, output_type);
   in.ConnectToSource(tex, connect_tok);
