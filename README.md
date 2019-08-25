@@ -104,7 +104,7 @@ These features are not supported in [AR Quick Look](https://developer.apple.com/
 *   Clamp and mirror texture wrap modes. All textures use repeat mode.
 *   Cameras.
 *   Shadow animation. Shadows are generated from the first frame.
-*   Transparent shadows. This is particularly noticable for transparent geometry near the ground, which will appear very dark due to shadow falloff.
+*   Transparent shadows. This is particularly noticeable for transparent geometry near the ground, which will appear very dark due to shadow falloff.
 *   Multiple UV sets. The converter works around this by disabling textures using secondary UV sets, which works best for the most common-use case: AO.
 *   Multiple animations. The converter just exports a single animation.
 *   Multiple scenes. The converter just exports a single scene.
