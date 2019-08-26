@@ -478,6 +478,7 @@ void Converter::CreateDebugBoneMesh(const SdfPath& parent_path,
   const VtArray<GfVec3f> extent({ aabb.GetMin(), aabb.GetMax() });
   const SdfPath path = parent_path.AppendElementString("debug_bone");
   const UsdGeomMesh usd_mesh = UsdGeomMesh::Define(cc_.stage, path);
+  usd_mesh.CreateSubdivisionSchemeAttr().Set(UsdGeomTokens->none);
   usd_mesh.GetPointsAttr().Set(kPoints);
   usd_mesh.GetNormalsAttr().Set(kNorms);
   usd_mesh.GetFaceVertexIndicesAttr().Set(tri_indices);
@@ -609,6 +610,7 @@ void Converter::CreateMesh(
     }
     const SdfPath path(path_str);
     UsdGeomMesh usd_mesh = UsdGeomMesh::Define(cc_.stage, path);
+    usd_mesh.CreateSubdivisionSchemeAttr().Set(UsdGeomTokens->none);
 
     // Set vertex attributes.
     UFG_ASSERT_FORMAT(!prim_info.pos.empty());
