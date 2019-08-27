@@ -28,6 +28,7 @@
 #include "pxr/usd/usd/attribute.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdGeom/mesh.h"
+#include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usdGeom/scope.h"
 #include "pxr/usd/usdGeom/xform.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
@@ -39,13 +40,15 @@
 namespace ufg {
 using PXR_NS::SdfAssetPath;
 using PXR_NS::SdfValueTypeNames;
+using PXR_NS::TfMakeValidIdentifier;
 using PXR_NS::UsdAttribute;
 using PXR_NS::UsdGeomMesh;
 using PXR_NS::UsdGeomPrimvar;
+using PXR_NS::UsdGeomScope;
+using PXR_NS::UsdGeomSetStageUpAxis;
+using PXR_NS::UsdGeomTokens;
 using PXR_NS::UsdGeomXform;
 using PXR_NS::UsdGeomXformOp;
-using PXR_NS::UsdGeomScope;
-using PXR_NS::UsdGeomTokens;
 using PXR_NS::UsdShadeInput;
 using PXR_NS::UsdShadeMaterialBindingAPI;
 using PXR_NS::UsdSkelAnimation;
@@ -64,11 +67,25 @@ constexpr float kDefaultEulerTol = 0.00001f;
 const GfVec3f kDefaultScale(1.0f, 1.0f, 1.0f);
 constexpr float kDefaultScaleTol = 0.00001f;
 
-const char* const kPassRootNames[] = {
-    "/Meshes",         // kPassRigid
-    "/SkinnedMeshes",  // kPassSkinned
+const char* const kPassNames[] = {
+    "Meshes",         // kPassRigid
+    "SkinnedMeshes",  // kPassSkinned
 };
-static_assert(UFG_ARRAY_SIZE(kPassRootNames) == kPassCount, "");
+static_assert(UFG_ARRAY_SIZE(kPassNames) == kPassCount, "");
+
+const char* const kDefaultAbsolutePath = "/default";
+
+// Converts the filename to a valid absolute SdfPath by removing any extension,
+// converting to a valid identifier, then prepending with '/'.
+// See usd/pxr/base/tf/stringUtils.h:TfIsValidIdentifier for more details.
+SdfPath MakeAbsolutePath(const std::string& filename) {
+  UFG_ASSERT_LOGIC(filename.find('/') == std::string::npos);
+  std::string name = filename.substr(0, filename.find_first_of('.'));
+  if (name.empty()) {
+    return SdfPath(kDefaultAbsolutePath);
+  }
+  return SdfPath("/" + TfMakeValidIdentifier(name));
+}
 
 Gltf::Id GetSceneId(const Gltf& gltf, const ConvertSettings& settings) {
   if (!settings.all_nodes) {
@@ -389,13 +406,15 @@ void Converter::Reset(Logger* logger) {
   debug_bone_material_ = UsdShadeMaterial();
 }
 
-bool Converter::Convert(
-    const ConvertSettings& settings, const Gltf& gltf, GltfStream* gltf_stream,
-    const std::string& src_dir, const std::string& dst_dir,
-    const SdfLayerRefPtr& layer, Logger* logger) {
+bool Converter::Convert(const ConvertSettings& settings, const Gltf& gltf,
+                        GltfStream* gltf_stream, const std::string& src_dir,
+                        const std::string& dst_dir,
+                        const std::string& dst_filename,
+                        const SdfLayerRefPtr& layer, Logger* logger) {
   try {
     const size_t old_error_count = logger->GetErrorCount();
-    ConvertImpl(settings, gltf, gltf_stream, src_dir, dst_dir, layer, logger);
+    ConvertImpl(settings, gltf, gltf_stream, src_dir, dst_dir, dst_filename,
+                layer, logger);
     cc_.once_logger.Flush();
     cc_.logger = nullptr;
     const size_t error_count = logger->GetErrorCount();
@@ -937,34 +956,36 @@ void Converter::CreateNodes(const std::vector<Gltf::Id>& root_nodes) {
       continue;
     }
 
-    const SdfPath root_path(kPassRootNames[pass]);
-    const UsdGeomXform root_xform = UsdGeomXform::Define(cc_.stage, root_path);
-    const UsdGeomXformOp root_scale_op = root_xform.AddScaleOp();
+    const SdfPath pass_path =
+        cc_.root_path.AppendElementString(kPassNames[pass]);
+    const UsdGeomXform pass_xform = UsdGeomXform::Define(cc_.stage, pass_path);
+    const UsdGeomXformOp pass_scale_op = pass_xform.AddScaleOp();
 
     // Skinned meshes may have been reanchored to the root (which doesn't have a
     // source node).
     if (pass == kPassSkinned && root_node_info_.passes_used[kPassSkinned]) {
-      CreateSkinnedMeshes(root_path, root_node_info_.skinned_node_ids, false);
+      CreateSkinnedMeshes(pass_path, root_node_info_.skinned_node_ids, false);
     }
 
     curr_pass_ = static_cast<Pass>(pass);
     for (const Gltf::Id node_id : root_nodes) {
-      CreateNodeHierarchy(node_id, root_path, identity);
+      CreateNodeHierarchy(node_id, pass_path, identity);
     }
 
     // Apply root scale, optionally scaling it to limit the bounding box size.
-    float root_scale = cc_.settings.root_scale;
+    // TODO(b/140108978): Remove once root_scale is no longer needed.
+    float path_scale = cc_.settings.root_scale;
     if (cc_.settings.limit_bounds > 0.0f) {
-      const GfBBox3d bound = root_xform.ComputeLocalBound(
+      const GfBBox3d bound = pass_xform.ComputeLocalBound(
           UsdTimeCode::Default(), UsdGeomTokens->default_);
       const GfVec3d size = GetBoxSize(bound);
       const double max_dim = MaxComponent(size);
       if (max_dim > cc_.settings.limit_bounds) {
         const double limit_scale = cc_.settings.limit_bounds / max_dim;
-        root_scale = static_cast<float>(root_scale * limit_scale);
+        path_scale = static_cast<float>(path_scale * limit_scale);
       }
     }
-    root_scale_op.Set(GfVec3f(root_scale));
+    pass_scale_op.Set(GfVec3f(path_scale));
   }
 }
 
@@ -1038,10 +1059,11 @@ void Converter::CreateAnimation(const AnimInfo& anim_info) {
   }
 }
 
-void Converter::ConvertImpl(
-    const ConvertSettings& settings, const Gltf& gltf, GltfStream* gltf_stream,
-    const std::string& src_dir, const std::string& dst_dir,
-    const SdfLayerRefPtr& layer, Logger* logger) {
+void Converter::ConvertImpl(const ConvertSettings& settings, const Gltf& gltf,
+                            GltfStream* gltf_stream, const std::string& src_dir,
+                            const std::string& dst_dir,
+                            const std::string& dst_filename,
+                            const SdfLayerRefPtr& layer, Logger* logger) {
   Reset(logger);
 
   cc_.settings = settings;
@@ -1051,6 +1073,8 @@ void Converter::ConvertImpl(
   cc_.stage = UsdStage::Open(layer);
   cc_.gltf_cache.Reset(&gltf, gltf_stream);
   node_parents_ = GetNodeParents(gltf.nodes);
+
+  UsdGeomSetStageUpAxis(cc_.stage, pxr::UsdGeomTokens->y);
 
   const Gltf::Id scene_id = GetSceneId(gltf, cc_.settings);
   const std::vector<Gltf::Id> root_nodes =
@@ -1136,6 +1160,11 @@ void Converter::ConvertImpl(
   for (const Gltf::Id node_id : root_nodes) {
     PropagatePassesUsed(node_id, gltf.nodes.data(), node_infos_.data());
   }
+
+  // All existing root nodes will be placed under the following root node for
+  // USDz.
+  cc_.root_path = MakeAbsolutePath(dst_filename);
+  UsdGeomXform::Define(cc_.stage, cc_.root_path);
 
   if (anim_id != Gltf::Id::kNull) {
     CreateAnimation(anim_info_);

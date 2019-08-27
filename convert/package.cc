@@ -257,8 +257,9 @@ bool ConvertGltfToUsd(const char* src_gltf_path, const char* dst_usd_path,
     return false;
   }
   Converter converter;
-  const bool convert_success = converter.Convert(
-      settings, gltf, gltf_stream.get(), src_dir, dst_dir, gltf_layer, logger);
+  const bool convert_success =
+      converter.Convert(settings, gltf, gltf_stream.get(), src_dir, dst_dir,
+                        dst_name, gltf_layer, logger);
   CleanerSentry cleaner_sentry(&converter, logger);
   if (!convert_success) {
     // Error message already logged on failure.

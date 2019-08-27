@@ -41,7 +41,7 @@ using PXR_NS::SdfAssetPath;
 using PXR_NS::UsdShadeInput;
 using PXR_NS::VtValue;
 
-const SdfPath Materializer::kMaterialsPath("/Materials");
+const SdfPath Materializer::kMaterialsPath("Materials");
 
 void Materializer::Clear() {
   cc_ = nullptr;
@@ -52,7 +52,8 @@ void Materializer::Clear() {
 
 void Materializer::Begin(ConvertContext* cc) {
   cc_ = cc;
-  scope_ = UsdGeomScope::Define(cc->stage, kMaterialsPath);
+  scope_ =
+      UsdGeomScope::Define(cc->stage, cc->root_path.AppendPath(kMaterialsPath));
   texturator_.Begin(cc);
 }
 
@@ -75,7 +76,7 @@ const Materializer::Value& Materializer::FindOrCreate(Gltf::Id material_id) {
   }
 
   const std::string material_path_str = cc_->path_table.MakeUnique(
-      kMaterialsPath, "material", material.name, material_index);
+      scope_.GetPath(), "material", material.name, material_index);
   value.path = SdfPath(material_path_str);
   value.material = UsdShadeMaterial::Define(cc_->stage, value.path);
 

@@ -38,6 +38,7 @@ struct ConvertContext {
   Logger* logger;
   GltfOnceLogger once_logger;
   UsdStageRefPtr stage;
+  SdfPath root_path;
 
   void Reset(Logger* logger) {
     src_dir.clear();
@@ -49,6 +50,7 @@ struct ConvertContext {
     this->logger = logger;
     once_logger.Reset(logger);
     stage = UsdStageRefPtr();
+    root_path = SdfPath::EmptyPath();
   }
 };
 }  // namespace ufg

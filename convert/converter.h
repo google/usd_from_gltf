@@ -53,8 +53,8 @@ class Converter {
   void Reset(Logger* logger);
   bool Convert(const ConvertSettings& settings, const Gltf& gltf,
                GltfStream* gltf_stream, const std::string& src_dir,
-               const std::string& dst_dir, const SdfLayerRefPtr& layer,
-               Logger* logger);
+               const std::string& dst_dir, const std::string& dst_filename,
+               const SdfLayerRefPtr& layer, Logger* logger);
   const std::vector<std::string>& GetWritten() const {
     return materializer_.GetWritten();
   }
@@ -106,8 +106,8 @@ class Converter {
   void CreateAnimation(const AnimInfo& anim_info);
   void ConvertImpl(const ConvertSettings& settings, const Gltf& gltf,
                    GltfStream* gltf_stream, const std::string& src_dir,
-                   const std::string& dst_dir, const SdfLayerRefPtr& layer,
-                   Logger* logger);
+                   const std::string& dst_dir, const std::string& dst_filename,
+                   const SdfLayerRefPtr& layer, Logger* logger);
 };
 
 }  // namespace ufg
