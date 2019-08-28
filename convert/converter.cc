@@ -26,6 +26,7 @@
 #include "pxr/base/vt/value.h"
 #include "pxr/usd/sdf/types.h"
 #include "pxr/usd/usd/attribute.h"
+#include "pxr/usd/usd/modelAPI.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdGeom/metrics.h"
@@ -36,6 +37,8 @@
 #include "pxr/usd/usdSkel/bindingAPI.h"
 #include "pxr/usd/usdSkel/root.h"
 #include "pxr/usd/usdSkel/skeleton.h"
+#include "third_party/usd/pxr/usd/usd/modelAPI.h"
+#include "third_party/usd/pxr/usd/usdGeom/tokens.h"
 
 namespace ufg {
 using PXR_NS::SdfAssetPath;
@@ -49,6 +52,8 @@ using PXR_NS::UsdGeomSetStageUpAxis;
 using PXR_NS::UsdGeomTokens;
 using PXR_NS::UsdGeomXform;
 using PXR_NS::UsdGeomXformOp;
+using PXR_NS::UsdModelAPI;
+using PXR_NS::UsdPrim;
 using PXR_NS::UsdShadeInput;
 using PXR_NS::UsdShadeMaterialBindingAPI;
 using PXR_NS::UsdSkelAnimation;
@@ -1059,6 +1064,21 @@ void Converter::CreateAnimation(const AnimInfo& anim_info) {
   }
 }
 
+void Converter::CreateStage(const SdfLayerRefPtr& layer,
+                            const std::string& dst_filename) {
+  cc_.stage = UsdStage::Open(layer);
+
+  // All nodes are placed under the following root node.
+  cc_.root_path = MakeAbsolutePath(dst_filename);
+  UsdPrim prim = cc_.stage->DefinePrim(cc_.root_path, TfToken("Xform"));
+  prim.SetAssetInfoByKey(TfToken("name"),
+                         VtValue(cc_.root_path.GetElementString()));
+  UsdModelAPI(prim).SetKind(TfToken("component"));
+  cc_.stage->SetDefaultPrim(prim);
+
+  UsdGeomSetStageUpAxis(cc_.stage, pxr::UsdGeomTokens->y);
+}
+
 void Converter::ConvertImpl(const ConvertSettings& settings, const Gltf& gltf,
                             GltfStream* gltf_stream, const std::string& src_dir,
                             const std::string& dst_dir,
@@ -1066,15 +1086,13 @@ void Converter::ConvertImpl(const ConvertSettings& settings, const Gltf& gltf,
                             const SdfLayerRefPtr& layer, Logger* logger) {
   Reset(logger);
 
+  CreateStage(layer, dst_filename);
   cc_.settings = settings;
   cc_.gltf = &gltf;
   cc_.src_dir = src_dir;
   cc_.dst_dir = dst_dir;
-  cc_.stage = UsdStage::Open(layer);
   cc_.gltf_cache.Reset(&gltf, gltf_stream);
   node_parents_ = GetNodeParents(gltf.nodes);
-
-  UsdGeomSetStageUpAxis(cc_.stage, pxr::UsdGeomTokens->y);
 
   const Gltf::Id scene_id = GetSceneId(gltf, cc_.settings);
   const std::vector<Gltf::Id> root_nodes =
@@ -1160,11 +1178,6 @@ void Converter::ConvertImpl(const ConvertSettings& settings, const Gltf& gltf,
   for (const Gltf::Id node_id : root_nodes) {
     PropagatePassesUsed(node_id, gltf.nodes.data(), node_infos_.data());
   }
-
-  // All existing root nodes will be placed under the following root node for
-  // USDz.
-  cc_.root_path = MakeAbsolutePath(dst_filename);
-  UsdGeomXform::Define(cc_.stage, cc_.root_path);
 
   if (anim_id != Gltf::Id::kNull) {
     CreateAnimation(anim_info_);

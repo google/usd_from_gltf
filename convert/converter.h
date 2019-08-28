@@ -88,6 +88,8 @@ class Converter {
   AnimInfo anim_info_;
   UsdShadeMaterial debug_bone_material_;
 
+  void CreateStage(const SdfLayerRefPtr& layer,
+                   const std::string& dst_filename);
   void CreateDebugBoneMesh(const SdfPath& parent_path, bool reverse_winding);
   void CreateSkeleton(const SdfPath& path, const SkinInfo& skin_info);
   GfVec3f CreateSkelAnim(const SdfPath& path, const SkinInfo& skin_info,
