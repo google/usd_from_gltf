@@ -480,7 +480,7 @@ class GltfValidator {
     if (v.yfov <= 0.0f) {
       Log<GLTF_ERROR_CAMERA_YFOV_LE_0>(v.yfov);
     }
-    if (v.znear >= v.zfar) {
+    if (v.zfar != 0.0f && v.znear >= v.zfar) {
       Log<GLTF_ERROR_CAMERA_ZNEAR_PAST_ZFAR>(v.znear, v.zfar);
     }
   }
