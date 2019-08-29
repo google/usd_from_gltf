@@ -26,6 +26,8 @@ import subprocess
 import zipfile
 
 from . import util
+from PIL import Image
+from PIL import ImageChops
 from .util import join_path
 from .util import norm_relpath
 from .util import status
@@ -63,6 +65,51 @@ def get_default_diff_command():
   return None
 
 
+def histogram_channels(histogram):
+  """Yields histogram's color channels in slices of size 256."""
+  for i in range(0, len(histogram), 256):
+    yield histogram[i:i + 256]
+
+
+def max_histogram_bucket(histogram):
+  """Returns max index of all non-zero buckets."""
+  return max([i for i, diff in enumerate(histogram) if diff != 0])
+
+
+def compare_images(golden, test, threshold=3):
+  """Returns true if the images are equal within a per pixel threshold.
+
+  Args:
+    golden: the golden image file
+    test: the test image file
+    threshold: in range [0, 255]
+
+  Returns:
+    true if all pixel differences are less than or equal to threshold, else
+    returns false
+  """
+  with Image.open(golden) as g_image, Image.open(test) as t_image:
+    histogram = ImageChops.difference(g_image, t_image).histogram()
+    # Finds the max index of non-zero buckets and compares with the threshold.
+    #   - Bucket N contains count of all pixels that differ by N.
+    max_buckets = [
+        max_histogram_bucket(channel)
+        for channel in histogram_channels(histogram)
+    ]
+    return max(max_buckets) <= threshold
+
+
+def handle_crc_difference(golden_zip, golden_info, test_zip, test_info):
+  """Returns results of more relaxed comparisons for the files."""
+  try:
+    with golden_zip.open(golden_info) as golden, test_zip.open(
+        test_info) as test:
+      return compare_images(golden, test)
+  except IOError:
+    # Non-images always return false.
+    return False
+
+
 def compare_usdz_content(golden_path, test_path):
   """Returns true if usdz content matches."""
   with zipfile.ZipFile(golden_path) as golden_zip:
@@ -78,7 +125,8 @@ def compare_usdz_content(golden_path, test_path):
         if test_info.file_size != golden_info.file_size:
           return False
         if test_info.CRC != golden_info.CRC:
-          return False
+          return handle_crc_difference(golden_zip, golden_info, test_zip,
+                                       test_info)
       return True
   return False
 
