@@ -117,9 +117,8 @@ bool UsdGltfFileFormat::Read(SdfLayer* layer,
 
   const SdfLayerRefPtr gltf_layer = SdfLayer::CreateAnonymous(".usda");
   ufg::Converter converter;
-  if (!converter.Convert(
-          settings, gltf, gltf_stream.get(), src_dir, src_dir, gltf_layer,
-          &logger)) {
+  if (!converter.Convert(settings, gltf, gltf_stream.get(), src_dir, src_dir,
+                         resolved_path, gltf_layer, &logger)) {
     TF_RUNTIME_ERROR("Failed converting GLTF file: %s", resolved_path.c_str());
     return false;
   }
