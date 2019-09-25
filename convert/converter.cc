@@ -31,13 +31,14 @@
 #include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usdGeom/scope.h"
-#include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdSkel/animation.h"
 #include "pxr/usd/usdSkel/bindingAPI.h"
 #include "pxr/usd/usdSkel/root.h"
 #include "pxr/usd/usdSkel/skeleton.h"
+#include "third_party/usd/pxr/usd/usd/modelAPI.h"
+#include "third_party/usd/pxr/usd/usdGeom/tokens.h"
 
 namespace ufg {
 using PXR_NS::SdfAssetPath;
