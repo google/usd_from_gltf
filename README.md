@@ -15,6 +15,8 @@ TLDR: [Install](#installation-steps) it, then [convert](#using-the-command-line-
     *   *(Linux)* `sudo apt-get install nasm`
     *   *(OSX)* `brew install nasm` (requires [Homebrew](https://brew.sh))
     *   *(Windows)* Use the installer for the latest stable release.
+*   Install [PIL](https://pillow.readthedocs.io).
+    *   `pip install Pillow`
 *   Download `usd_from_gltf` source to `{UFG_SRC}`.
 *   Install to `{UFG_BUILD}` (with optional test data):
 
