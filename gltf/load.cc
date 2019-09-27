@@ -1252,9 +1252,8 @@ class GltfLoader {
 
 }  // namespace
 
-bool GltfLoad(
-    std::istream& is, const char* name, const GltfLoadSettings& settings,
-    Gltf* out_gltf, GltfLogger* logger) {
+bool GltfLoad(std::istream& is, const GltfLoadSettings& settings,
+              Gltf* out_gltf, GltfLogger* logger) {
   const size_t old_error_count = logger->GetErrorCount();
 
   // Parse json file.

@@ -969,7 +969,7 @@ bool GltfLoadAndValidate(
     return false;
   }
   Gltf gltf;
-  if (!GltfLoad(*is, name, settings, &gltf, logger)) {
+  if (!GltfLoad(*is, settings, &gltf, logger)) {
     return false;
   }
   if (!GltfValidate(gltf, logger)) {
