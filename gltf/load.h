@@ -29,8 +29,7 @@ struct GltfLoadSettings {
 };
 
 // Load glTF from an input stream.
-bool GltfLoad(
-    std::istream& is, const char* name, const GltfLoadSettings& settings,
-    Gltf* out_gltf, GltfLogger* logger);
+bool GltfLoad(std::istream& is, const GltfLoadSettings& settings,
+              Gltf* out_gltf, GltfLogger* logger);
 
 #endif  // GLTF_LOAD_H_
