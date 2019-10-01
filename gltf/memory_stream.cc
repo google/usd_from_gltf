@@ -42,6 +42,8 @@ size_t GltfMemoryStream::GlbRead(size_t size, void* out_data) {
   const size_t space = size_ - pos_;
   const size_t read_size = std::min(space, size);
   memcpy(out_data, data_ + pos_, read_size);
+  const size_t new_pos = pos_ + size;
+  pos_ = std::min(new_pos, size_);
   return read_size;
 }
 
