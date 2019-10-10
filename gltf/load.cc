@@ -650,6 +650,10 @@ class GltfLoader {
     }
     case Json::value_t::number_float: {
       const float float_value = json.get<float>();
+      if (float_value < 0.f) {
+        Log<GLTF_ERROR_EXPECTED_UINT_IS_FLOAT>(float_value);
+        return;
+      }
       value = static_cast<uint32_t>(float_value);
       if (static_cast<float>(value) != float_value) {
         Log<GLTF_ERROR_EXPECTED_UINT_IS_FLOAT>(float_value);
