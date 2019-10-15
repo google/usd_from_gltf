@@ -17,6 +17,9 @@
 #include "load.h"  // NOLINT: Silence relative path warning.
 
 #include <stdarg.h>
+
+#include <limits>
+
 #include "internal_util.h"  // NOLINT: Silence relative path warning.
 #include "json.hpp"
 
@@ -650,7 +653,8 @@ class GltfLoader {
     }
     case Json::value_t::number_float: {
       const float float_value = json.get<float>();
-      if (float_value < 0.f) {
+      if (float_value < 0.f ||
+          float_value > std::numeric_limits<uint32_t>::max()) {
         Log<GLTF_ERROR_EXPECTED_UINT_IS_FLOAT>(float_value);
         return;
       }
