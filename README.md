@@ -1,12 +1,24 @@
 # USD from glTF
 
-Library, command-line tool, and import plugin for converting [glTF](https://www.khronos.org/gltf/) models to [Pixar's USD format](https://graphics.pixar.com/usd/docs/index.html), compatible with [AR Quick Look](https://developer.apple.com/arkit/gallery) on iOS.
+Library, command-line tool, and import plugin for converting [glTF](https://www.khronos.org/gltf/) models to [USD] (https://graphics.pixar.com/usd/docs/index.html) formatted assets for display in [AR Quick Look](https://developer.apple.com/arkit/gallery).
 
 *Please note that this is not an officially supported Google product.*
 
-This is a C++ native library that serves as an alternative to existing scripted solutions. Its main benefits are improved compatibility and conversion speed (see [Compatibility](#compatibility) and [Performance](#performance)).
+This is a C++ native library that serves as an alternative to existing scripted solutions. Its main benefits are improved compatibility with iOS and conversion speed (see [Compatibility](#compatibility) and [Performance](#performance)). It is treating USDZ as a transmission format rather than an interchange format. For more information about transmission and interchange file formats see [here](http://nickporcino.com/posts/last_mile_interchange.html).
 
 TLDR: [Install](#installation-steps) it, then [convert](#using-the-command-line-tool) with: `usd_from_gltf <source.gltf> <destination.usdz>`
+
+## Background
+glTF is a transmission format for 3D assets that is well suited to the web and mobile devices by removing data that is not important for efficient display of assets. USD is an interchange format that can be used for file editing in Digital Content Creation tools (ie. Maya).
+
+However, iOS Quick Look supports displaying [USDZ](https://graphics.pixar.com/usd/docs/Usdz-File-Format-Specification.html) files with a subset of the USD file specification. This tool converts glTF files to USDZ for display in Quick Look, attempting to emulate as much of glTF’s functionality as possible in iOS Quick Look runtime.
+
+The emulation process is lossy. For example, to support double sided glTF materials, the geometry is doubled. This allows the converted glTF to display correctly on iOS, but importing back into a DCC application will not be the same data as the original source file.
+
+This tool specifically addresses the use case of converting a file from glTF->USDZ->QuickLook.
+Going DCC->glTF optimizes the asset for runtime viewing, and may lose information if the converted USDZ is imported back in the DCC tool, like subdivision surfaces.
+
+When converting glTF->USD->DCC, Apple's USDPython tools will better preserve the data in the glTF file at the cost of not having the same compatibility with existing versions of iOS Quick Look.
 
 ## Installation Steps
 
@@ -65,7 +77,7 @@ To use it, set the `PXR_PLUGINPATH_NAME` environment variable to the directory c
 
 ## Compatibility
 
-While USD is a general-purpose format, this library focuses on compatibility with [AR Quick Look](https://developer.apple.com/arkit/gallery). The [AR Quick Look](https://developer.apple.com/arkit/gallery) renderer only supports a subset of the [glTF 2.0 specification](https://github.com/KhronosGroup/glTF) though, so there are several limitations. Where reasonable, missing features are emulated.
+While USD is a general-purpose format, this library focuses on compatibility with [AR Quick Look](https://developer.apple.com/arkit/gallery). The [AR Quick Look](https://developer.apple.com/arkit/gallery) renderer only supports a subset of the [glTF 2.0 specification](https://github.com/KhronosGroup/glTF) though, so there are several limitations. Where reasonable, missing features are emulated in an effort to reproduce  glTF files as faithfully as possible on iOS. The emulation can be lossy process and the output is not well suited as an interchange format.
 
 ### Key Features
 *   Reads both text (glTF) and binary (GLB) input files.
@@ -73,16 +85,16 @@ While USD is a general-purpose format, this library focuses on compatibility wit
 *   Reads embedded binary data and [Draco](https://github.com/google/draco)-compressed meshes.
 *   Rigid and skinned animation.
 *   Untextured, textured, unlit and, PBR lit materials.
-*   glTF extensions: [KHR_materials_unlit](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit), [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness), [KHR_texture_transform](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform), [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression)
+*   glTF extensions: [KHR_materials_unlit](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit), [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness), [KHR_texture_transform](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform) (partially, see notes below), [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression)
 *   It is expected to convert all well-formed glTF files, although some features may be missing or emulated. It is known to build all Khronos glTF [sample](https://github.com/KhronosGroup/glTF-Sample-Models) and [reference](https://github.com/KhronosGroup/glTF-Asset-Generator) models.
 
 ### Emulated Functionality for [AR Quick Look](https://developer.apple.com/arkit/gallery)
 Several rendering features of glTF are not currently supported in [AR Quick Look](https://developer.apple.com/arkit/gallery), but they are emulated where reasonable. The emulated features are:
 
-*   Texture channel references. The [USD preview surface](https://graphics.pixar.com/usd/docs/UsdPreviewSurface-Proposal.html) supports this, but [AR Quick Look](https://developer.apple.com/arkit/gallery) requires distinct textures for the roughness, metallic, and occlusion channels. The converter splits channels into separate textures and recompresses them as necessary.
+*   Texture channel references. USD supports this, but currently [AR Quick Look](https://developer.apple.com/arkit/gallery) requires distinct textures for the roughness, metallic, and occlusion channels. The converter splits channels into separate textures and recompresses them as necessary.
 *   Texture color scale and offset. These are emulated by baking the scale and offset into the texture. This potentially increases the output size if a texture is referenced multiple times with different settings.
-*   Texture UV transforms. These are emulated by baking transforms into vertex UVs.
-*   Specular workflow. [USD preview surface](https://graphics.pixar.com/usd/docs/UsdPreviewSurface-Proposal.html) supports specular workflow, but [AR Quick Look](https://developer.apple.com/arkit/gallery) does not. The converter with generate metallic+roughness textures as an approximation.
+*   Texture UV transforms. These are emulated by baking transforms into vertex UVs. Note that because they are baked into the single UV set for the model, so different textures can't use different transformations on the same mesh.
+*   Specular workflow. Currently [AR Quick Look](https://developer.apple.com/arkit/gallery) does not support this. The converter with generate metallic+roughness textures as an approximation.
 *   Arbitrary asset sizes. [AR Quick Look](https://developer.apple.com/arkit/gallery) has some limit (empirically, around 200MB) to the decompressed size, and will fail to load models larger than this. The converter works around this by globally resizing textures to fit within the configured limit.
 *   Unlit materials. The converter emulates these with a pure emissive material. This mostly works, but there are some differences due a rim light factor in the [AR Quick Look](https://developer.apple.com/arkit/gallery) renderer.
 *   sRGB emissive texture. [AR Quick Look](https://developer.apple.com/arkit/gallery) incorrectly treats the emissive texture as linear rather than sRGB, so the converter works around this by converting to linear.
@@ -90,9 +102,9 @@ Several rendering features of glTF are not currently supported in [AR Quick Look
 *   Double-sided geometry. The converter works around this by duplicating geometry.
 *   Normal-map normalization. [AR Quick Look](https://developer.apple.com/arkit/gallery) does not normalize normal-map normals, causing incorrect lighting for some textures. The converter explicitly renormalizes normal-map textures to work around this.
 *   Inverted transforms. [AR Quick Look](https://developer.apple.com/arkit/gallery) will incorrectly face-cull for inverted geometry, so the converter works around this by baking the reversed polygon winding into the mesh where necessary.
-*   Quaternion-based rigid animation. [USD preview surface](https://graphics.pixar.com/usd/docs/UsdPreviewSurface-Proposal.html) does not support quaternions for rigid animations. The converter works around this by converting to Euler, which may suffer from [Gimbal lock](https://en.wikipedia.org/wiki/Gimbal_lock) issues. To reduce error, the converter bakes Euler keys at a higher frequency, which can increase animation size.
+*   Quaternion-based rigid animation. This is not supported in iOS 12. The converter works around this by converting to Euler, which may suffer from [Gimbal lock](https://en.wikipedia.org/wiki/Gimbal_lock) issues. To reduce error, the converter bakes Euler keys at a higher frequency, which can increase animation size.
 *   Spherical linear ([slerp](https://en.wikipedia.org/wiki/Slerp)) interpolation for rotations. All interpolation is linear, so blends between matrix or quaternion keys are incorrect and can induce scale changes. The converter works around this by converting to Euler for rigid animation, and by baking quaternion keys at higher frequency for skinned animation.
-*   Per-joint animation channels. Skinning for [USD preview surface](https://graphics.pixar.com/usd/docs/UsdPreviewSurface-Proposal.html) is a special-case that does not make use of independent animation channels, so the converter expands source channels to a grid of (joints * keys) elements. Animations will be significantly larger than their glTF source for complex skeletons.
+*   Per-joint animation channels. Skinning does not make use of independent animation channels, so the converter expands source channels to a grid of (joints * keys) elements. Animations will be significantly larger than their glTF source for complex skeletons.
 *   Multiple skeletons. [AR Quick Look](https://developer.apple.com/arkit/gallery) only supports a single skeleton, so the converter emulates this by merging multiple skeletons into one (at some cost to animation size).
 *   Step and cubic animation interpolation modes. The converter emulates these by baking them to linear (again, at a cost of animation size).
 *   Vertex quantization/compression. All vertex components are converted to full float precision, and [Draco](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression)-compressed meshes are decompressed.
@@ -122,7 +134,7 @@ The [AR Quick Look](https://developer.apple.com/arkit/gallery) renderer does not
 
 ### Potential solutions to unsupported issues
 
-*   Cameras, vertex animation, and vertex colors are supported by the [USD preview surface](https://graphics.pixar.com/usd/docs/UsdPreviewSurface-Proposal.html) spec, just not currently by [AR Quick Look](https://developer.apple.com/arkit/gallery). These should be added in the interest of completeness and future-proofing.
+*   Cameras, vertex animation, and vertex colors are supported by the USD spec but not currently by [AR Quick Look](https://developer.apple.com/arkit/gallery). These should be added in the interest of completeness and future-proofing.
 *   Emulate texture mirror wrap mode by mirroring the texture. This is simple, but can increase texture size up to 4x.
 *   Emulate texture clamp wrap mode by clipping UVs. This involves relatively complicated clipping, but should not have a significant impact on model size.
 *   Emulate vertex colors by baking them into the texture. This is difficult to do generally because it may involve re-uv-mapping the model - something better left to content authors. It can be simplified for certain special cases, though (e.g. untextured models with only vertex colors can use a simple color atlas).
