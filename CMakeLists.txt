@@ -17,12 +17,10 @@ project (usd_from_gltf)
 
 # We don't use Python in this tool, but when the USD library is built with
 # PXR_PYTHON_SUPPORT_ENABLED it references it anyway.
-if (EXISTS "${USD_DIR}/lib/python/")
-  find_package(Python COMPONENTS Development)
-  if (NOT Python_FOUND)
-    message(FATAL_ERROR "Missing python libs.")
-  endif (NOT Python_FOUND)
-endif (EXISTS "${USD_DIR}/lib/python/")
+find_package(Python COMPONENTS Development)
+if (NOT Python_FOUND)
+  message(FATAL_ERROR "Missing python libs.")
+endif (NOT Python_FOUND)
 
 set(USD_INCLUDE_DIRS
   "${USD_DIR}/include"
@@ -54,6 +52,7 @@ elseif (APPLE)
 set(USD_LIBS
   ${Python_LIBRARIES}
   -lpthread
+  "${USD_DIR}/lib/libboost_python.dylib"
   libgf.dylib
   libplug.dylib
   libsdf.dylib
@@ -65,13 +64,11 @@ set(USD_LIBS
   libusdUtils.dylib
   libvt.dylib
 )
-if (Python_FOUND)
-  list(APPEND USD_LIBS "${USD_DIR}/lib/libboost_python.dylib")
-endif (Python_FOUND)
 else ()
 set(USD_LIBS
   ${Python_LIBRARIES}
   -lpthread
+  "${USD_DIR}/lib/libboost_python.so"
   libgf.so
   libplug.so
   libsdf.so
@@ -83,9 +80,6 @@ set(USD_LIBS
   libusdUtils.so
   libvt.so
 )
-if (Python_FOUND)
-  list(APPEND USD_LIBS "${USD_DIR}/lib/libboost_python.so")
-endif (Python_FOUND)
 endif ()
 
 if (MSVC)
