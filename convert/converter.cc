@@ -682,7 +682,7 @@ void Converter::CreateMesh(
         const TfToken uvset_tok(AppendNumber("st", number));
         const UsdGeomPrimvar uvs_primvar = usd_mesh.CreatePrimvar(
             uvset_tok, SdfValueTypeNames->TexCoord2fArray,
-            UsdGeomTokens->varying);
+            UsdGeomTokens->vertex);
         SetVertexValues(uvs_primvar, *uv, emulate_double_sided);
       }
     }
