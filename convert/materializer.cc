@@ -24,14 +24,16 @@
 namespace ufg {
 namespace {
 
-// Methods for converting fallback values to GfVec4f for UsdUVTexture nodes.
-GfVec4f FallbackToVec4(const GfVec4f& value) { return value; }
+// Methods for converting generic vector values to GfVec4f for UsdUVTexture
+// nodes.
+GfVec4f ToVec4(const GfVec4f& value) { return value; } // NOLINT: Vector
+// types valid for use by ToVec4 include Vec4s.
 
-GfVec4f FallbackToVec4(const GfVec3f& value) {
+GfVec4f ToVec4(const GfVec3f& value) {
   return GfVec4f(value[0], value[1], value[2], 1.f);
 }
 
-GfVec4f FallbackToVec4(const float value) {
+GfVec4f ToVec4(const float value) {
   return GfVec4f(value, 0.f, 0.f, 1.f);
 }
 
@@ -112,7 +114,7 @@ const Materializer::Value& Materializer::FindOrCreate(Gltf::Id material_id) {
     AttachTextureInput(
         norm_args, material.normalTexture, material_id, value.path,
         "tex_normal", kTokInputNormal, SdfValueTypeNames->Normal3f,
-        kFallbackNormal, kTokRgb, SdfValueTypeNames->Float3,
+        kFallbackNormal, kTokRgb, SdfValueTypeNames->Float3, true,
         &value.uvsets, &pbr_shader);
 
     Texturator::Args emissive_args = GetDefaultTextureArgs();
@@ -123,7 +125,7 @@ const Materializer::Value& Materializer::FindOrCreate(Gltf::Id material_id) {
     AttachTextureInput(
         emissive_args, material.emissiveTexture, material_id, value.path,
         "tex_emissive", kTokInputEmissiveColor, SdfValueTypeNames->Color3f,
-        kFallbackEmissive, kTokRgb, SdfValueTypeNames->Float3,
+        kFallbackEmissive, kTokRgb, SdfValueTypeNames->Float3, false,
         &value.uvsets, &pbr_shader);
 
     Texturator::Args occl_args = GetDefaultTextureArgs();
@@ -132,7 +134,7 @@ const Materializer::Value& Materializer::FindOrCreate(Gltf::Id material_id) {
     AttachTextureInput(
         occl_args, material.occlusionTexture, material_id, value.path,
         "tex_occlusion", kTokInputOcclusion, SdfValueTypeNames->Float,
-        kFallbackOcclusion, kTokR, SdfValueTypeNames->Float,
+        kFallbackOcclusion, kTokR, SdfValueTypeNames->Float, false,
         &value.uvsets, &pbr_shader);
   }
 
@@ -282,13 +284,13 @@ UsdShadeShader Materializer::CreateTextureShader(
   return tex;
 }
 
-template <typename Vec>
-void Materializer::AttachTextureInputTo(
+template <typename Vec>void Materializer::AttachTextureInputTo(
     const std::string& usd_name, Gltf::Id sampler_id,
     const Gltf::Material::Texture& input, const SdfPath& material_path,
     const char* tex_name, const TfToken& input_tok,
     const SdfValueTypeName& input_type, const Vec& scale, const Vec& fallback,
-    const TfToken& connect_tok, const SdfValueTypeName& output_type,
+    const TfToken& connect_tok,
+    const SdfValueTypeName& output_type, const bool is_normal,
     UvsetMap* uvsets, UsdShadeShader* pbr_shader) {
   UsdShadeInput in = pbr_shader->CreateInput(input_tok, input_type);
 
@@ -297,14 +299,30 @@ void Materializer::AttachTextureInputTo(
       CreateTextureShader(input.texCoord, sampler_id, disk_path, usd_name,
                           material_path, *uvsets, tex_name);
   tex.CreateInput(kTokFallback, SdfValueTypeNames->Float4)
-      .Set(FallbackToVec4(fallback));
-  if (!cc_->settings.bake_texture_color_scale_bias) {
-    tex.CreateInput(kTokScale, SdfValueTypeNames->Float4)
-        .Set(FallbackToVec4(fallback));
+      .Set(ToVec4(fallback));
+  if (is_normal) {
+    // As per USD documentation, normal maps should have scale of 2 and bias
+    // of -1. We multiply by the scale provided by gltf, which is 1 by
+    // default.
+    if (!cc_->settings.bake_texture_color_scale_bias) {
+      tex.CreateInput(kTokScale, SdfValueTypeNames->Float4)
+          .Set(ToVec4(scale) * 2.0f);
+    } else {
+      // Any scaling specified in the gltf will have been baked into the normal
+      // texture.
+      tex.CreateInput(kTokScale, SdfValueTypeNames->Float4)
+          .Set(GfVec4f(2.0f));
+    }
+    tex.CreateInput(kTokBias, SdfValueTypeNames->Float4)
+        .Set(GfVec4f(-1.0f));
+  } else if (!cc_->settings.bake_texture_color_scale_bias) {
+      tex.CreateInput(kTokScale, SdfValueTypeNames->Float4)
+          .Set(ToVec4(scale));
   }
   tex.CreateOutput(connect_tok, output_type);
   in.ConnectToSource(tex, connect_tok);
 }
+
 
 template <typename Vec>
 void Materializer::AttachTextureInput(
@@ -312,7 +330,7 @@ void Materializer::AttachTextureInput(
     Gltf::Id material_id, const SdfPath& material_path, const char* tex_name,
     const TfToken& input_tok, const SdfValueTypeName& input_type,
     const Vec& fallback, const TfToken& connect_tok,
-    const SdfValueTypeName& output_type, UvsetMap* uvsets,
+    const SdfValueTypeName& output_type, const bool is_normal, UvsetMap* uvsets,
     UsdShadeShader* pbr_shader) {
   const Vec scale = ColorToVec<Vec>(tex_args.scale);
   UsdShadeInput in = pbr_shader->CreateInput(input_tok, input_type);
@@ -328,7 +346,7 @@ void Materializer::AttachTextureInput(
   const std::string& usd_name = texturator_.Add(texture->source, tex_args);
   AttachTextureInputTo(usd_name, texture->sampler, input, material_path,
                        tex_name, input_tok, input_type, scale, fallback,
-                       connect_tok, output_type, uvsets, pbr_shader);
+                       connect_tok, output_type, is_normal, uvsets, pbr_shader);
 }
 
 void Materializer::AttachBaseTextureInput(
@@ -555,7 +573,7 @@ void Materializer::AttachMetallicRoughnessTextureInput(
   AttachTextureInput(
       metal_args, input, material_id, material_path,
       "tex_metallic", kTokInputMetallic, SdfValueTypeNames->Float,
-      kFallbackMetallic, kTokR, SdfValueTypeNames->Float,
+      kFallbackMetallic, kTokR, SdfValueTypeNames->Float, false,
       uvsets, pbr_shader);
 
   Texturator::Args rough_args = GetDefaultTextureArgs();
@@ -564,7 +582,7 @@ void Materializer::AttachMetallicRoughnessTextureInput(
   AttachTextureInput(
       rough_args, input, material_id, material_path,
       "tex_roughness", kTokInputRoughness, SdfValueTypeNames->Float,
-      kFallbackRoughness, kTokR, SdfValueTypeNames->Float,
+      kFallbackRoughness, kTokR, SdfValueTypeNames->Float, false,
       uvsets, pbr_shader);
 }
 
@@ -649,8 +667,8 @@ void Materializer::AttachSpecularGlossinessTextureInput(
     AttachTextureInputTo(*metal_name, metal_sampler_id, metal_input,
                          material_path, "tex_metallic", kTokInputMetallic,
                          SdfValueTypeNames->Float, material.pbr.metallicFactor,
-                         kFallbackMetallic, kTokR, SdfValueTypeNames->Float,
-                         uvsets, pbr_shader);
+                         kFallbackMetallic, kTokR,
+                         SdfValueTypeNames->Float, false, uvsets, pbr_shader);
 
     // Set roughness to (1 - glossiness).
     if (spec_gloss_texture) {
@@ -660,7 +678,7 @@ void Materializer::AttachSpecularGlossinessTextureInput(
       AttachTextureInput(
           rough_args, input, material_id, material_path,
           "tex_roughness", kTokInputRoughness, SdfValueTypeNames->Float,
-          kFallbackRoughness, kTokR, SdfValueTypeNames->Float,
+          kFallbackRoughness, kTokR, SdfValueTypeNames->Float, false,
           uvsets, pbr_shader);
     } else {
       pbr_shader->CreateInput(kTokInputRoughness, SdfValueTypeNames->Float)
@@ -687,7 +705,7 @@ void Materializer::AttachSpecularGlossinessTextureInput(
       AttachTextureInput(
           spec_args, input, material_id, material_path,
           "tex_specular", kTokInputSpecularColor, SdfValueTypeNames->Float3,
-          kFallbackSpecular, kTokRgb, SdfValueTypeNames->Float3,
+          kFallbackSpecular, kTokRgb, SdfValueTypeNames->Float3, false,
           uvsets, pbr_shader);
 
       Texturator::Args gloss_args = GetDefaultTextureArgs();
@@ -696,7 +714,7 @@ void Materializer::AttachSpecularGlossinessTextureInput(
       AttachTextureInput(
           gloss_args, input, material_id, material_path,
           "tex_glossiness", kTokInputGlossiness, SdfValueTypeNames->Float,
-          kFallbackRoughness, kTokR, SdfValueTypeNames->Float,
+          kFallbackRoughness, kTokR, SdfValueTypeNames->Float, false,
           uvsets, pbr_shader);
     } else {
       pbr_shader->CreateInput(kTokInputSpecularColor, SdfValueTypeNames->Float3)

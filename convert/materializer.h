@@ -114,15 +114,16 @@ class Materializer {
                             const Vec& scale, const Vec& fallback,
                             const TfToken& connect_tok,
                             const SdfValueTypeName& output_type,
-                            UvsetMap* uvsets, UsdShadeShader* pbr_shader);
+                            const bool is_normal, UvsetMap* uvsets,
+                            UsdShadeShader* pbr_shader);
   template <typename Vec>
   void AttachTextureInput(
       const Texturator::Args& tex_args, const Gltf::Material::Texture& input,
       Gltf::Id material_id, const SdfPath& material_path, const char* tex_name,
       const TfToken& input_tok, const SdfValueTypeName& input_type,
       const Vec& fallback, const TfToken& connect_tok,
-      const SdfValueTypeName& output_type, UvsetMap* uvsets,
-      UsdShadeShader* pbr_shader);
+      const SdfValueTypeName& output_type, const bool is_normal,
+      UvsetMap* uvsets, UsdShadeShader* pbr_shader);
   void AttachBaseTextureInput(
       const std::string* usd_name, const Texturator::Args& tex_args,
       const Gltf::Material::Texture& input,

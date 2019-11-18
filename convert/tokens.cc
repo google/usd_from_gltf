@@ -28,6 +28,7 @@ const TfToken kTokPreviewSurface("UsdPreviewSurface");
 const TfToken kTokPrimvarFloat2("UsdPrimvarReader_float2");
 const TfToken kTokResult("result");
 const TfToken kTokScale("scale");
+const TfToken kTokBias("bias");
 const TfToken kTokSt("st");
 const TfToken kTokSurface("surface");
 const TfToken kTokUvTexture("UsdUVTexture");
