@@ -60,6 +60,7 @@ class Texturator {
     Fallback fallback = kFallbackBlack;
     Gltf::Material::AlphaMode alpha_mode = Gltf::Material::kAlphaModeOpaque;
     float alpha_cutoff = 0.5f;
+    float opacity = 1.f;
     ColorF scale = ColorF::kOne;
     ColorF bias = ColorF::kZero;
     ImageResizeSettings resize;

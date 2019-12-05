@@ -101,6 +101,17 @@ const Materializer::Value& Materializer::FindOrCreate(Gltf::Id material_id) {
       base_args.alpha_mode = material.alphaMode;
       base_args.alpha_cutoff = material.alphaCutoff;
       base_args.scale.Assign(material.pbr.baseColorFactor);
+      if (cc_->settings.bake_texture_color_scale_bias &&
+          base_args.alpha_mode == Gltf::Material::kAlphaModeBlend) {
+        // If we are baking the scale from the baseColorFactor, do not bake the
+        // alpha. Instead, set the material opacity to that value.
+        base_args.opacity = material.pbr.baseColorFactor[3];
+        base_args.scale.Assign(material.pbr.baseColorFactor[0],
+                               material.pbr.baseColorFactor[1],
+                               material.pbr.baseColorFactor[2], 1.f);
+      } else {
+        base_args.scale.Assign(material.pbr.baseColorFactor);
+      }
       AttachBaseTextureInput(
           base_args, material.pbr.baseColorTexture, material_id, value.path,
           kTokInputDiffuseColor, &value.uvsets, &pbr_shader);
@@ -403,16 +414,30 @@ void Materializer::AttachBaseTextureInput(
 
   // Blending is enabled based on alpha_mode, but disabled if the effective
   // alpha is 1.0.
-  const bool blend =
-      tex_args.alpha_mode != Gltf::Material::kAlphaModeOpaque &&
-      !texturator_.IsAlphaOpaque(image_id, tex_args.scale.a, tex_args.bias.a);
+  const bool blend = tex_args.alpha_mode != Gltf::Material::kAlphaModeOpaque &&
+                     (!texturator_.IsAlphaOpaque(image_id, tex_args.scale.a,
+                                                 tex_args.bias.a) ||
+                      tex_args.opacity < 1.0f - kColorTol);
+  const bool use_tex_args_opacity =
+      cc_->settings.bake_texture_color_scale_bias &&
+      tex_args.alpha_mode == Gltf::Material::kAlphaModeBlend;
   if (blend) {
     UsdShadeInput in_opacity =
         pbr_shader->CreateInput(kTokInputOpacity, SdfValueTypeNames->Float);
     if (tex) {
-      in_opacity.ConnectToSource(tex, kTokA);
+      if (use_tex_args_opacity && tex_args.opacity < 1.0f - kColorTol) {
+        // Scalar opacity is only used if we are baking the baseColorFactor
+        // into the texture.
+        in_opacity.Set(tex_args.opacity);
+      } else {
+        in_opacity.ConnectToSource(tex, kTokA);
+      }
     } else {
-      in_opacity.Set(tex_args.scale.a);
+      // The scale alpha value is 1 if we are baking the baseColorFactor into
+      // the texture even if the texture does not exist. Instead we use the
+      // opacity tex_args value in this case.
+      in_opacity.Set(use_tex_args_opacity ? tex_args.opacity
+                                          : tex_args.scale.a);
     }
   }
 }
