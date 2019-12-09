@@ -668,8 +668,8 @@ const std::string* Texturator::AddDst(Gltf::Id image_id, const Args& args,
   // Choose image type based on the source type and presence of alpha.
   Gltf::Image::MimeType dst_mime_type = mime_type;
   const bool is_supported_output_type =
-      (dst_mime_type != Gltf::Image::kMimeJpeg &&
-       dst_mime_type != Gltf::Image::kMimePng);
+      (dst_mime_type == Gltf::Image::kMimeJpeg ||
+       dst_mime_type == Gltf::Image::kMimePng);
   const bool override_jpg =
       cc_->settings.prefer_jpeg && dst_mime_type != Gltf::Image::kMimeJpeg;
   if (!is_supported_output_type || override_jpg) {
