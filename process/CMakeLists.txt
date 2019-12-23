@@ -1,3 +1,8 @@
+find_package(ZLIB REQUIRED)
+if (NOT ZLIB_FOUND)
+  message(FATAL_ERROR "Missing zlib libs.")
+endif (NOT ZLIB_FOUND)
+
 find_package(draco)
 if (NOT draco_FOUND)
   message(FATAL_ERROR "Draco package not found.")
@@ -12,15 +17,6 @@ find_package(stb_image)
 if (NOT stb_image_FOUND)
   message(FATAL_ERROR "STB Image package not found.")
 endif (NOT stb_image_FOUND)
-
-get_filename_component(PARENT_DIR ${stb_image_LIBRARY_DIR} DIRECTORY)
-if (APPLE)
-  set(ZLIB_LIBRARIES ${PARENT_DIR}/src/zlib-1.2.11/libz.dylib)
-elseif (WIN32)
-  set(ZLIB_LIBRARIES ${PARENT_DIR}/src/zlib-1.2.11/Release/zlib.lib)
-else ()
-  set(ZLIB_LIBRARIES ${PARENT_DIR}/src/zlib-1.2.11/libz.so)
-endif ()
 
 include_directories(
   ..
@@ -64,6 +60,7 @@ set_target_properties(process PROPERTIES PUBLIC_HEADER "${PROCESS_HEADERS}")
 # Libpng and libturbojpeg do not define library directories. We need to search
 # for them because on different distros, they appear in different locations.
 set(INSTALLED_LIBRARY_DIR ${stb_image_LIBRARY_DIR})
+get_filename_component(PARENT_DIR ${stb_image_LIBRARY_DIR} DIRECTORY)
 find_library(PNG_LIBRARY
   NAMES libpng16.a libpng16_static.lib
   HINTS ${stb_image_LIBRARY_DIR} ${PARENT_DIR}/lib64
@@ -83,22 +80,22 @@ endif (NOT TURBOJPEG_LIBRARY)
 if (MSVC)
 target_link_libraries(process
   common
+  "${ZLIB_LIBRARIES}"
   "${draco_LIBRARY_DIR}/dracodec.lib"
   "${giflib_LIBRARY_DIR}/giflib.lib"
   "${stb_image_LIBRARY_DIR}/stb_image.lib"
   "${PNG_LIBRARY}"
-  "${ZLIB_LIBRARIES}"
   "${TURBOJPEG_LIBRARY}"
 )
 else (MSVC)
 
 target_link_libraries(process
   common
+  "${ZLIB_LIBRARIES}"
   "${draco_LIBRARY_DIR}/libdracodec.a"
   "${giflib_LIBRARY_DIR}/libgiflib.a"
   "${stb_image_LIBRARY_DIR}/libstb_image.a"
   "${PNG_LIBRARY}"
-  "${ZLIB_LIBRARIES}"
   "${TURBOJPEG_LIBRARY}"
 )
 endif (MSVC)

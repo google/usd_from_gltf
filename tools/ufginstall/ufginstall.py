@@ -212,26 +212,10 @@ class PngDep(Dep):
   def install(self):
     """Installs libpng dependency."""
     url = 'https://download.sourceforge.net/libpng/libpng-1.6.37.tar.gz'
+    extra_args = ['-DCMAKE_POSITION_INDEPENDENT_CODE=1']
     path = os.path.join(cfg.src_dir, 'png.zip')
     force = self.forced()
     dl_dir = download_archive(url, path, force)
-    zlib_dir = os.path.normpath(os.path.join(cfg.src_dir, 'zlib-1.2.11'))
-    extra_args = [
-        '-DCMAKE_POSITION_INDEPENDENT_CODE=1', '-DPNG_BUILD_ZLIB=yesplease',
-        '-DZLIB_INCLUDE_DIR=' + zlib_dir
-    ]
-    if platform.system() == 'Windows':
-      zlib_release_dir = os.path.join(zlib_dir, 'Release')
-      extra_args.append('-DCMAKE_PREFIX_PATH=' + zlib_release_dir)
-      extra_args.append('-DZLIB_LIBRARY=' +
-                        os.path.join(zlib_release_dir, 'zlib.lib'))
-    else:
-      extra_args.append('-DCMAKE_PREFIX_PATH=' + zlib_dir)
-      if platform.system() == 'Darwin':
-        extra_args.append('-DZLIB_LIBRARY=' +
-                          os.path.join(zlib_dir, 'libz.dylib'))
-      else:
-        extra_args.append('-DZLIB_LIBRARY=' + os.path.join(zlib_dir, 'libz.so'))
     with cwd(dl_dir):
       run_cmake(force, extra_args)
 
@@ -270,41 +254,6 @@ class TclapDep(Dep):
     copy_patch_files(patch_paths, dl_dir)
     with cwd(dl_dir):
       run_cmake(force)
-
-
-class ZlibDep(Dep):
-  """Installs zlib dependency."""
-
-  def __init__(self):
-    Dep.__init__(self, 'ZLIB', 'src/zlib-1.2.11/zlib.h')
-
-  def install(self):
-    """Installs zlib dependency."""
-    url = 'https://github.com/madler/zlib/archive/v1.2.11.zip'
-    path = os.path.join(cfg.src_dir, 'zlib.zip')
-    force = self.forced()
-    dl_dir = download_archive(url, path, force)
-    with cwd(dl_dir):
-      src_dir = os.getcwd()
-      build_dir = os.path.join(cfg.build_dir, os.path.split(src_dir)[1])
-      if force and os.path.isdir(build_dir):
-        # Delete existing directory content, but preserve the directory itself
-        # because we're going to need it (and on Windows, quickly deleting then
-        # recreating a directory may cause transient failures).
-        delete_directory_content(build_dir)
-      if platform.system() == 'Windows':
-        # Run msbuild instead of using run_cmake to properly handle LNK2001 and
-        # LNK2019 unresolved external issues caused by improper use of the
-        # ZLIB_WINAPI c++ preprocessor. Cmake generates a visual studio project
-        # specific to the current machine, and msbuild builds zlib from the
-        # generated project file.
-        run(['cmake', '-DCMAKE_GENERATOR_PLATFORM=x64', '.'])
-        run(['cmake'])
-        run(['msbuild', '/P:Configuration=Release', 'zlib.sln'])
-      else:
-        run(['chmod', '+x', 'configure'])
-        run(['./configure'])
-        run(['make'])
 
 
 class TestDataSamplesDep(Dep):
@@ -369,7 +318,6 @@ JPG = JpgDep()
 JSON = JsonDep()
 PNG = PngDep()
 STB_IMAGE = StbImageDep()
-ZLIB = ZlibDep()
 TCLAP = TclapDep()
 TESTDATA_SAMPLES = TestDataSamplesDep()
 TESTDATA_REFERENCE = TestDataReferenceDep()
@@ -386,7 +334,7 @@ def main():
   task = Task()
 
   # Get the set of dependencies to install.
-  deps = [DRACO, GIF, JPG, JSON, ZLIB, PNG, STB_IMAGE, TCLAP]
+  deps = [DRACO, GIF, JPG, JSON, PNG, STB_IMAGE, TCLAP]
   if args.testdata:
     deps += [TESTDATA_SAMPLES, TESTDATA_REFERENCE]
   installed_deps = []
