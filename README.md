@@ -163,3 +163,10 @@ Converting 28 complex skinned and animated glTF models to USDZ:
 
 *   usd_from_gltf, 1 process: 22.6, 22.5, 22.6 (average: **22.6 seconds**)
 *   usd_from_gltf, 12 processes: 5.0, 5.3, 5.1 (average: **5.2 seconds**)
+
+### Troubleshooting
+
+If you are having trouble building or running usd_from_gltf, please follow the steps below.
+
+*   Ensure that the environment variables were set correctly after installing USD.
+*   Add the Zlib libraries to your PATH.
