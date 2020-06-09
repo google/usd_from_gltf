@@ -688,23 +688,24 @@ void Converter::CreateMesh(
     }
 
     // Set vertex colors.
-    const float* const color_scalars = prim_info.color_stride == 3
-                                           ? prim_info.color3.data()->data()
-                                           : prim_info.color4.data()->data();
     const size_t color_scalar_count = prim_info.color_stride == 3
                                           ? prim_info.color3.size()
                                           : prim_info.color4.size();
-    if (color_scalar_count > 0 &&
-        !AllNearlyEqual(color_scalars, color_scalar_count, 1.0f, kColorTol)) {
-      // TODO: Add vertex colors. Not needed right now because we're
-      // targeting the iOS viewer which doesn't support it. And while Usdview
-      // supports it, it's not compatible with texturing because you must
-      // replace the color input normally used for texturing (and the color
-      // multiplier field does not work).
-      const std::string src_mesh_name =
-          Gltf::GetName(cc_.gltf->meshes, Gltf::IndexToId(mesh_index), "mesh");
-      LogOnce<UFG_WARN_VERTEX_COLORS_UNSUPPORTED>(
-          &cc_.once_logger, " Mesh(es): ", src_mesh_name.c_str());
+    if (color_scalar_count > 0) {
+      const float* const color_scalars = prim_info.color_stride == 3
+                                             ? prim_info.color3.data()->data()
+                                             : prim_info.color4.data()->data();
+      if (!AllNearlyEqual(color_scalars, color_scalar_count, 1.0f, kColorTol)) {
+        // TODO: Add vertex colors. Not needed right now because we're
+        // targeting the iOS viewer which doesn't support it. And while Usdview
+        // supports it, it's not compatible with texturing because you must
+        // replace the color input normally used for texturing (and the color
+        // multiplier field does not work).
+        const std::string src_mesh_name = Gltf::GetName(
+            cc_.gltf->meshes, Gltf::IndexToId(mesh_index), "mesh");
+        LogOnce<UFG_WARN_VERTEX_COLORS_UNSUPPORTED>(
+            &cc_.once_logger, " Mesh(es): ", src_mesh_name.c_str());
+      }
     }
 
     const VtArray<int>* tri_vert_indices = &prim_info.tri_vert_indices;

@@ -143,17 +143,19 @@ void CopyAccessorToVectors(
   UFG_ASSERT_LOGIC(component_count == Vec::dimension);
   const Scalar* src = scalars;
   out_vecs->resize(src_vec_count);
-  Scalar* dst = out_vecs->data()->data();
-  for (size_t i = 0; i != src_vec_count; ++i, src += component_count) {
-    if (!used[i]) {
-      continue;
+  if (src_vec_count > 0) {
+    Scalar* dst = out_vecs->data()->data();
+    for (size_t i = 0; i != src_vec_count; ++i, src += component_count) {
+      if (!used[i]) {
+        continue;
+      }
+      std::copy(src, src + component_count, dst);
+      dst += component_count;
     }
-    std::copy(src, src + component_count, dst);
-    dst += component_count;
+    const size_t dst_scalar_count = dst - out_vecs->data()->data();
+    const size_t dst_vec_count = dst_scalar_count / Vec::dimension;
+    out_vecs->resize(dst_vec_count);
   }
-  const size_t dst_scalar_count = dst - out_vecs->data()->data();
-  const size_t dst_vec_count = dst_scalar_count / Vec::dimension;
-  out_vecs->resize(dst_vec_count);
 }
 
 template <typename Array>
