@@ -38,6 +38,14 @@ When converting glTF->USD->DCC, Apple's USDPython tools will better preserve the
 *   *(Optional)* Build test data. See ufginstall script output for the ufgtest.py command.
 *   *(Optional)* Set `PXR_PLUGINPATH_NAME` so the glTF import plugin is available in Usdview. See ufginstall script output for the path.
 
+### Troubleshooting
+
+If you are having trouble building or running usd_from_gltf, please follow the steps below.
+
+*   Ensure that the environment variables were set correctly after installing USD.
+*   Ensure you have the depencendies specified as _required_ in [build USD](https://github.com/PixarAnimationStudios/USD).
+*   If you simply want to consume this tool, consider using this [docker image](https://github.com/leon/docker-gltf-to-udsz) as discussed in [this issue](https://github.com/google/usd_from_gltf/issues/39).
+
 
 ## Using the Command-Line Tool
 
@@ -163,10 +171,3 @@ Converting 28 complex skinned and animated glTF models to USDZ:
 
 *   usd_from_gltf, 1 process: 22.6, 22.5, 22.6 (average: **22.6 seconds**)
 *   usd_from_gltf, 12 processes: 5.0, 5.3, 5.1 (average: **5.2 seconds**)
-
-### Troubleshooting
-
-If you are having trouble building or running usd_from_gltf, please follow the steps below.
-
-*   Ensure that the environment variables were set correctly after installing USD.
-*   Add the Zlib libraries to your PATH.
