@@ -32,6 +32,8 @@ add_executable(usd_from_gltf
 target_link_libraries(usd_from_gltf
   convert
   ${USD_LIBS}
+  python3.7m
+  boost_python37
 )
 
 install(TARGETS usd_from_gltf DESTINATION bin)
