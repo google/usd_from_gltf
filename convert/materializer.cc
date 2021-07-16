@@ -86,7 +86,7 @@ const Materializer::Value& Materializer::FindOrCreate(Gltf::Id material_id) {
   UsdShadeShader pbr_shader =
       UsdShadeShader::Define(cc_->stage, pbr_shader_path);
   pbr_shader.CreateIdAttr(VtValue(kTokPreviewSurface));
-  value.material.CreateSurfaceOutput().ConnectToSource(pbr_shader, kTokSurface);
+  value.material.CreateSurfaceOutput().ConnectToSource(pbr_shader.ConnectableAPI(), kTokSurface);
 
   if (material.unlit) {
     AttachUnlitTextureInputs(
@@ -241,7 +241,7 @@ UsdShadeShader Materializer::CreateTextureShader(
   const auto uvset_found = uvsets.find(uvset_index);
   UFG_ASSERT_LOGIC(uvset_found != uvsets.end());
   tex.CreateInput(kTokSt, SdfValueTypeNames->Float2)
-      .ConnectToSource(uvset_found->second.shader, kTokResult);
+      .ConnectToSource(uvset_found->second.shader.ConnectableAPI(), kTokResult);
 
   // Set sampler states.
   Gltf::Sampler::WrapMode wrap_s =
@@ -331,7 +331,7 @@ template <typename Vec>void Materializer::AttachTextureInputTo(
           .Set(ToVec4(scale));
   }
   tex.CreateOutput(connect_tok, output_type);
-  in.ConnectToSource(tex, connect_tok);
+  in.ConnectToSource(tex.ConnectableAPI(), connect_tok);
 }
 
 
@@ -407,7 +407,7 @@ void Materializer::AttachBaseTextureInput(
     }
     tex.CreateOutput(kTokRgb, SdfValueTypeNames->Float3);
     tex.CreateOutput(kTokA, SdfValueTypeNames->Float);
-    in.ConnectToSource(tex, kTokRgb);
+    in.ConnectToSource(tex.ConnectableAPI(), kTokRgb);
   } else {
     in.Set(uvset_valid ? tex_args.scale.ToVec3() : ToVec3(kFallbackBase));
   }
@@ -430,7 +430,7 @@ void Materializer::AttachBaseTextureInput(
         // into the texture.
         in_opacity.Set(tex_args.opacity);
       } else {
-        in_opacity.ConnectToSource(tex, kTokA);
+        in_opacity.ConnectToSource(tex.ConnectableAPI(), kTokA);
       }
     } else {
       // The scale alpha value is 1 if we are baking the baseColorFactor into
@@ -515,7 +515,7 @@ void Materializer::AttachUnlitTextureInputs(
       }
       tex.CreateOutput(kTokRgb, SdfValueTypeNames->Float3);
       tex.CreateOutput(kTokA, SdfValueTypeNames->Float);
-      emissive_in.ConnectToSource(tex, kTokRgb);
+      emissive_in.ConnectToSource(tex.ConnectableAPI(), kTokRgb);
     } else {
       emissive_in.Set(uvset_valid ? tex_args.scale.ToVec3()
                                   : ToVec3(kFallbackBase));
@@ -561,8 +561,8 @@ void Materializer::AttachUnlitTextureInputs(
         }
         tex.CreateOutput(kTokRgb, SdfValueTypeNames->Float3);
         tex.CreateOutput(kTokA, SdfValueTypeNames->Float);
-        diffuse_in.ConnectToSource(tex, kTokRgb);
-        opacity_in.ConnectToSource(tex, kTokA);
+        diffuse_in.ConnectToSource(tex.ConnectableAPI(), kTokRgb);
+        opacity_in.ConnectToSource(tex.ConnectableAPI(), kTokA);
       } else {
         diffuse_in.Set(kColorBlack);
         opacity_in.Set(opacity_scale);
