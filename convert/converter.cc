@@ -479,7 +479,7 @@ void Converter::CreateDebugBoneMesh(const SdfPath& parent_path,
         material_path.AppendElementString("pbr_shader");
     UsdShadeShader pbr_shader = UsdShadeShader::Define(stage, pbr_shader_path);
     pbr_shader.CreateIdAttr(VtValue(kTokPreviewSurface));
-    usd_material.CreateSurfaceOutput().ConnectToSource(pbr_shader, kTokSurface);
+    usd_material.CreateSurfaceOutput().ConnectToSource(pbr_shader.ConnectableAPI(), kTokSurface);
     pbr_shader.CreateInput(kTokInputUseSpecular, SdfValueTypeNames->Int).Set(1);
     pbr_shader.CreateInput(kTokInputSpecularColor, SdfValueTypeNames->Color3f)
         .Set(kColorBlack);
