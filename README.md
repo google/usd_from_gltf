@@ -23,6 +23,11 @@ When converting glTF->USD->DCC, Apple's USDPython tools will better preserve the
 ## Installation Steps
 
 *   Download and build [USD](https://github.com/PixarAnimationStudios/USD). See the associated README for prerequisites and build steps. Refer to USD installation directory as `{USD}`.
+cmake
+*   Install [CMAKE](https://cmake.org/).
+    *   *(Linux)* `sudo apt-get install cmake`
+    *   *(OSX)* Use the installer for the latest stable release.
+    *   *(Windows)* Use the installer for the latest stable release.
 *   Install [NASM](https://www.nasm.us).
     *   *(Linux)* `sudo apt-get install nasm`
     *   *(OSX)* `brew install nasm` (requires [Homebrew](https://brew.sh))
