@@ -20,10 +20,13 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "third_party/absl/strings/string_view.h"
 
 enum GltfSeverity : uint8_t {
   kGltfSeverityNone,
@@ -60,8 +63,8 @@ struct GltfMessage {
     this->text = text;
   }
 
-  void Assign(const GltfWhatInfo* what_info,
-              const std::string& path, const std::string& text) {
+  void Assign(const GltfWhatInfo* what_info, absl::string_view path,
+              absl::string_view text) {
     this->what_info = what_info;
     this->path = path;
     this->text = text;
@@ -225,7 +228,7 @@ class GltfLogger {
 
   // Push/pop the name of the current object being logged, used to provide
   // additional context in implementation messages.
-  void PushName(const std::string& name) { names_.push_back(name); }
+  void PushName(absl::string_view name) { names_.push_back(std::string(name)); }
   void PopName() { names_.pop_back(); }
 
   // Get the current object name, if any.
@@ -257,7 +260,7 @@ class GltfPrintLogger : public GltfLogger {
       const char* line_prefix = "", FILE* output_file = nullptr)
       : line_prefix_(line_prefix), output_file_(output_file), error_count_(0) {}
 
-  void SetLinePrefix(const std::string& line_prefix) {
+  void SetLinePrefix(absl::string_view line_prefix) {
     line_prefix_ = line_prefix;
   }
 
