@@ -29,6 +29,7 @@ set(USD_INCLUDE_DIRS
   "${USD_DIR}/include/boost-1_61"
 # Visual Studio 2017 requires boost 1.65.1.
   "${USD_DIR}/include/boost-1_65_1"
+  "${USD_DIR}/include/boost-1_70"
   ${Python_INCLUDE_DIRS}
 )
 
@@ -39,16 +40,16 @@ link_directories(
 
 if (MSVC)
 set(USD_LIBS
-  gf.lib
-  plug.lib
-  sdf.lib
-  tf.lib
-  usd.lib
-  usdGeom.lib
-  usdShade.lib
-  usdSkel.lib
-  usdUtils.lib
-  vt.lib
+  usd_gf.lib
+  usd_plug.lib
+  usd_sdf.lib
+  usd_tf.lib
+  usd_usd.lib
+  usd_usdGeom.lib
+  usd_usdShade.lib
+  usd_usdSkel.lib
+  usd_usdUtils.lib
+  usd_vt.lib
 )
 elseif (APPLE)
 set(USD_LIBS

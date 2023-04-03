@@ -26,7 +26,7 @@ if (MSVC)
 target_link_libraries(ufg_plugin
   convert
   ${USD_LIBS}
-  arch.lib
+  usd_arch.lib
 )
 elseif (APPLE)
 target_link_libraries(ufg_plugin
