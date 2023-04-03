@@ -16,6 +16,7 @@
 
 #include "convert/converter.h"
 
+#include "pxr/usd/usdGeom/primvarsAPI.h"
 #include "common/common_util.h"
 #include "convert/convert_util.h"
 #include "convert/tokens.h"
@@ -28,6 +29,7 @@
 #include "pxr/usd/usd/attribute.h"
 #include "pxr/usd/usd/modelAPI.h"
 #include "pxr/usd/usd/stage.h"
+#include "pxr/usd/usdGeom/gprim.h"
 #include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usdGeom/scope.h"
@@ -49,6 +51,7 @@ using PXR_NS::UsdGeomPrimvar;
 using PXR_NS::UsdGeomScope;
 using PXR_NS::UsdGeomSetStageUpAxis;
 using PXR_NS::UsdGeomTokens;
+using PXR_NS::UsdGeomPrimvarsAPI;
 using PXR_NS::UsdGeomXform;
 using PXR_NS::UsdGeomXformOp;
 using PXR_NS::UsdModelAPI;
@@ -479,7 +482,7 @@ void Converter::CreateDebugBoneMesh(const SdfPath& parent_path,
         material_path.AppendElementString("pbr_shader");
     UsdShadeShader pbr_shader = UsdShadeShader::Define(stage, pbr_shader_path);
     pbr_shader.CreateIdAttr(VtValue(kTokPreviewSurface));
-    usd_material.CreateSurfaceOutput().ConnectToSource(pbr_shader, kTokSurface);
+    usd_material.CreateSurfaceOutput().ConnectToSource(pbr_shader.ConnectableAPI(), kTokSurface);
     pbr_shader.CreateInput(kTokInputUseSpecular, SdfValueTypeNames->Int).Set(1);
     pbr_shader.CreateInput(kTokInputSpecularColor, SdfValueTypeNames->Color3f)
         .Set(kColorBlack);
@@ -660,6 +663,8 @@ void Converter::CreateMesh(
 
     // Set UVs.
     if (material) {
+      UsdGeomPrimvarsAPI primvarsAPI(usd_mesh.GetPrim());
+
       for (const auto& uvset_kv : material_binding->uvsets) {
         const Gltf::Mesh::Attribute::Number number = uvset_kv.first;
         const auto uv_found = prim_info.uvs.find(number);
@@ -680,7 +685,7 @@ void Converter::CreateMesh(
           uv = &transformed_uv;
         }
         const TfToken uvset_tok(AppendNumber("st", number));
-        const UsdGeomPrimvar uvs_primvar = usd_mesh.CreatePrimvar(
+        const UsdGeomPrimvar uvs_primvar = primvarsAPI.CreatePrimvar(
             uvset_tok, SdfValueTypeNames->TexCoord2fArray,
             UsdGeomTokens->vertex);
         SetVertexValues(uvs_primvar, *uv, emulate_double_sided);

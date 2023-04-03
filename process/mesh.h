@@ -18,6 +18,7 @@
 #define UFG_PROCESS_MESH_H_
 
 #include <limits>
+#include <map>
 #include "common/common.h"
 #include "common/logging.h"
 #include "gltf/cache.h"
